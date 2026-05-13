@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>My Daily App</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0e; --bg2: #181817; --bg3: #212120;
+  --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+  --text: #f0ede8; --text2: #9e9b94; --text3: #5e5c57;
+  --gold: #c9a84c; --gold2: #e8c97a; --green: #4aaa72;
+  --blue: #4a8fc9; --red: #c94a4a; --radius: 14px; --radius-sm: 9px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+h1, h2 { font-family: 'DM Serif Display', serif; }
+.top-nav { position: sticky; top: 0; z-index: 40; background: rgba(15,15,14,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 1rem; display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+.top-nav::-webkit-scrollbar { display: none; }
+.nav-btn { background: none; border: none; border-bottom: 2px solid transparent; color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 14px 14px 12px; white-space: nowrap; cursor: pointer; letter-spacing: 0.03em; transition: color 0.15s; }
+.nav-btn.active { color: var(--gold2); border-bottom-color: var(--gold); }
+.app-header { padding: 1.5rem 1rem 0.5rem; }
+.app-header h1 { font-size: 28px; color: var(--gold2); letter-spacing: -0.02em; }
+.app-header .sub { font-size: 13px; color: var(--text3); margin-top: 3px; }
+.page { display: none; padding: 1rem; padding-bottom: 3rem; }
+.page.active { display: block; }
+.section-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; overflow: hidden; }
+.section-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; border-bottom: 1px solid var(--border); }
+.section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); display: flex; align-items: center; gap: 7px; }
+.section-title .icon { font-size: 14px; }
+.section-body { padding: 14px 16px; }
+.check-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+.check-row:last-child { border-bottom: none; padding-bottom: 0; }
+.check-row:first-child { padding-top: 0; }
+.cb { width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid var(--border2); background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; font-size: 11px; }
+.check-row.done .cb { background: var(--green); border-color: var(--green); }
+.check-row.done .cb::after { content: '✓'; color: #fff; font-weight: 700; }
+.check-row.done .check-label { color: var(--text3); text-decoration: line-through; }
+.check-label { font-size: 14px; flex: 1; line-height: 1.3; }
+.check-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.cb-circle { border-radius: 50%; }
+.check-row.done .cb-circle { background: var(--gold); border-color: var(--gold); }
+/* WATER */
+.water-display { text-align: center; padding: 10px 0 14px; }
+.water-big { font-family: 'DM Serif Display', serif; font-size: 48px; color: var(--gold2); line-height: 1; }
+.water-unit { font-size: 16px; color: var(--text3); }
+.water-bar-wrap { background: var(--bg3); border-radius: 6px; height: 6px; margin: 10px 0; overflow: hidden; }
+.water-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #3a7bd5, #4aabdd); transition: width 0.4s ease; }
+.water-goal-label { font-size: 12px; color: var(--text3); text-align: center; }
+.water-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.w-btn { flex: 1; min-width: 60px; padding: 9px 6px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--bg3); color: var(--text); cursor: pointer; text-align: center; transition: background 0.12s; }
+.w-btn:hover { background: var(--bg); }
+.w-custom { display: flex; gap: 8px; margin-top: 8px; }
+.w-custom input { flex: 1; padding: 9px 12px; font-size: 14px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; }
+.w-custom input:focus { border-color: var(--blue); }
+.small-btn { padding: 9px 16px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: transparent; color: var(--text); cursor: pointer; white-space: nowrap; }
+.small-btn:hover { background: var(--bg3); }
+.small-btn.primary { background: var(--gold); border-color: var(--gold); color: #0f0f0e; }
+.small-btn.primary:hover { background: var(--gold2); }
+/* WEIGHT */
+.weight-display { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+.weight-big { font-family: 'DM Serif Display', serif; font-size: 42px; color: var(--text); }
+.weight-unit { font-size: 14px; color: var(--text3); }
+.weight-date { font-size: 11px; color: var(--text3); margin-left: auto; }
+.weight-delta { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.weight-delta.up { color: var(--red); }
+.weight-delta.down { color: var(--green); }
+.weight-delta.same { color: var(--text3); }
+.inline-edit { display: flex; gap: 8px; margin-top: 8px; }
+.inline-edit input { flex: 1; padding: 8px 12px; font-size: 14px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; }
+/* SUPPLEMENTS with +/- */
+.supp-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.supp-row:last-child { border-bottom: none; }
+.supp-name { flex: 1; font-size: 14px; cursor: pointer; }
+.supp-count { font-size: 13px; font-weight: 600; color: var(--gold2); min-width: 24px; text-align: center; }
+.supp-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border2); background: var(--bg3); color: var(--text); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; }
+.supp-btn:hover { background: var(--bg); }
+.supp-del { background: none; border: none; color: var(--text3); font-size: 16px; cursor: pointer; padding: 2px 4px; }
+.supp-del:hover { color: var(--red); }
+/* PB */
+.pb-list { display: flex; flex-direction: column; gap: 0; }
+.pb-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.pb-item:last-child { border-bottom: none; }
+.pb-name { flex: 1; font-size: 14px; }
+.pb-val { font-size: 15px; font-weight: 600; color: var(--gold2); min-width: 80px; text-align: right; }
+.pb-edit-btn { background: none; border: none; color: var(--text3); font-size: 16px; cursor: pointer; padding: 2px 6px; }
+.pb-edit-btn:hover { color: var(--gold); }
+.pb-del-btn { background: none; border: none; color: var(--text3); font-size: 16px; cursor: pointer; padding: 2px 4px; }
+.pb-del-btn:hover { color: var(--red); }
+/* MUSCLES */
+.muscle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.muscle-btn { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; user-select: none; transition: all 0.12s; }
+.muscle-btn.active { background: rgba(74,170,114,0.12); border-color: var(--green); }
+.muscle-btn .dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--border2); flex-shrink: 0; transition: all 0.12s; }
+.muscle-btn.active .dot { background: var(--green); border-color: var(--green); }
+.muscle-btn span { font-size: 13px; color: var(--text2); flex:1; }
+.muscle-btn.active span { color: var(--text); }
+.muscle-del { background: none; border: none; color: transparent; font-size: 14px; cursor: pointer; padding: 0 2px; }
+.muscle-btn:hover .muscle-del { color: var(--text3); }
+.muscle-del:hover { color: var(--red) !important; }
+/* WORKOUT TIME */
+.workout-time-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.workout-time-label { font-size: 13px; color: var(--text2); flex:1; }
+.workout-time-val { font-size: 15px; font-weight: 600; color: var(--gold2); min-width: 60px; text-align: center; }
+/* NOTES */
+.notes-area { width: 100%; padding: 10px 12px; font-size: 14px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; resize: none; min-height: 80px; line-height: 1.5; }
+.notes-area:focus { border-color: var(--gold); }
+.notes-saved { font-size: 11px; color: var(--text3); margin-top: 4px; text-align: right; }
+/* ROSARY */
+.mystery-card { border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
+.mystery-header { display: flex; align-items: center; gap: 10px; padding: 11px 13px; cursor: pointer; user-select: none; }
+.mystery-header.done-all { background: rgba(201,168,76,0.08); }
+.mystery-name { flex: 1; font-size: 14px; }
+.mystery-prog { font-size: 11px; color: var(--text3); padding: 0 13px 10px; }
+.mystery-prayers { padding: 4px 13px 12px; border-top: 1px solid var(--border); display: none; }
+.mystery-prayers.open { display: block; }
+.mystery-toggle { background: none; border: none; color: var(--text3); font-size: 12px; cursor: pointer; padding: 2px; transition: transform 0.2s; }
+.mystery-toggle.open { transform: rotate(180deg); }
+/* PRAYER TEXT */
+.prayer-text-card { background: var(--bg3); border-radius: var(--radius-sm); padding: 14px; font-size: 13px; line-height: 1.75; color: var(--text2); font-style: italic; border-left: 2px solid var(--gold); margin-bottom: 8px; }
+.prayer-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; font-style: normal; }
+/* HISTORY */
+.hist-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+.hist-nav button { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 18px; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.hist-date { flex: 1; text-align: center; font-size: 14px; font-weight: 500; }
+.hist-section { margin-bottom: 1.25rem; }
+.hist-section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.hist-tag { display: inline-block; padding: 4px 10px; font-size: 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; color: var(--text2); margin: 3px 3px 3px 0; }
+.hist-tag.done { border-color: var(--green); color: var(--green); background: rgba(74,170,114,0.1); }
+.hist-water-big { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--blue); }
+.hist-weight-big { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--text); }
+/* WEIGHT TREND */
+.trend-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; margin-top: 10px; }
+.trend-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; }
+.trend-bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--gold); opacity: 0.7; min-height: 3px; transition: height 0.3s; }
+.trend-label { font-size: 9px; color: var(--text3); text-align: center; }
+.trend-val { font-size: 9px; color: var(--text2); }
+/* MISC */
+.badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.badge-gold { background: rgba(201,168,76,0.15); color: var(--gold2); border: 1px solid rgba(201,168,76,0.3); }
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.add-row { display: flex; gap: 8px; margin-top: 10px; }
+.add-row input { flex: 1; padding: 8px 11px; font-size: 13px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius); padding: 1.25rem; width: 100%; max-width: 360px; }
+.modal h3 { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 1rem; color: var(--gold2); }
+.modal label { font-size: 12px; color: var(--text3); display: block; margin-bottom: 4px; margin-top: 10px; }
+.modal input { width: 100%; padding: 9px 12px; font-size: 14px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; }
+.modal-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1rem; }
+.no-data { text-align: center; color: var(--text3); font-size: 13px; padding: 1rem 0; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="top-nav" id="topNav">
+  <button class="nav-btn active" onclick="showPage('today',this)">Today</button>
+  <button class="nav-btn" onclick="showPage('prayers',this)">Prayers</button>
+  <button class="nav-btn" onclick="showPage('fitness',this)">Fitness</button>
+  <button class="nav-btn" onclick="showPage('history',this)">History</button>
+</div>
+
+<!-- TODAY -->
+<div class="page active" id="page-today">
+  <div class="app-header">
+    <h1 id="todayGreeting">Good morning</h1>
+    <div class="sub" id="todayDate"></div>
+  </div>
+
+  <!-- WEIGHT -->
+  <div class="section-card" style="margin-top:1rem">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">⚖️</span> Weight</div>
+    </div>
+    <div class="section-body">
+      <div class="weight-display">
+        <div class="weight-big" id="weightDisplay">—</div>
+        <div class="weight-unit">lbs</div>
+        <div class="weight-date" id="weightDate"></div>
+      </div>
+      <div class="weight-delta" id="weightDelta"></div>
+      <div class="inline-edit">
+        <input type="number" id="weightInput" placeholder="Enter today's weight (lbs)" step="0.1" />
+        <button class="small-btn primary" onclick="logWeight()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WATER -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">💧</span> Water Intake</div>
+      <span id="waterGoalBadge" class="badge badge-gold"></span>
+    </div>
+    <div class="section-body">
+      <div class="water-display">
+        <div class="water-big" id="waterBig">0</div>
+        <div class="water-unit">oz today</div>
+        <div class="water-bar-wrap" style="margin-top:10px"><div class="water-bar-fill" id="waterBarFill" style="width:0%"></div></div>
+        <div class="water-goal-label" id="waterGoalLabel"></div>
+      </div>
+      <div class="water-btns">
+        <button class="w-btn" onclick="addWater(8)">+8 oz</button>
+        <button class="w-btn" onclick="addWater(12)">+12 oz</button>
+        <button class="w-btn" onclick="addWater(16)">+16 oz</button>
+        <button class="w-btn" onclick="addWater(24)">+24 oz</button>
+        <button class="w-btn" onclick="addWater(32)">+32 oz</button>
+      </div>
+      <div class="w-custom">
+        <input type="number" id="waterCustom" placeholder="Custom oz" min="1" />
+        <button class="small-btn" onclick="addWaterCustom()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPPLEMENTS -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">💊</span> Daily Supplements</div>
+      <button class="small-btn" onclick="openSuppModal()" style="font-size:12px;padding:5px 11px;">+ Add</button>
+    </div>
+    <div class="section-body" id="suppList"></div>
+  </div>
+</div>
+
+<!-- PRAYERS -->
+<div class="page" id="page-prayers">
+  <div class="app-header">
+    <h1>Prayers</h1>
+    <div class="sub">Daily devotions — resets each morning</div>
+  </div>
+
+  <!-- ROSARY -->
+  <div class="section-card" style="margin-top:1rem">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">📿</span> Rosary Mysteries</div>
+    </div>
+    <div class="section-body" id="rosaryList"></div>
+  </div>
+
+  <!-- PRAYER CHECKLIST -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">🙏</span> Daily Prayers</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="prayerBadge" class="badge badge-gold"></span>
+        <button class="small-btn" onclick="openCustomPrayerModal()" style="font-size:12px;padding:5px 11px;">+ Add</button>
+      </div>
+    </div>
+    <div class="section-body" id="prayerCheckList"></div>
+  </div>
+
+  <!-- PRAYER TEXTS -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">✝️</span> Prayer Texts</div>
+    </div>
+    <div class="section-body">
+      <div class="prayer-text-card">
+        <div class="prayer-title">Soul of Christ (Anima Christi)</div>
+        Soul of Christ, sanctify me. Body of Christ, save me. Blood of Christ, inebriate me. Water from Christ's side, wash me. Passion of Christ, strengthen me. O good Jesus, hear me. Within Thy wounds hide me. Suffer me not to be separated from Thee. From the malicious enemy defend me. In the hour of my death call me. And bid me come unto Thee. That I may praise Thee with Thy saints and with Thy angels forever and ever. Amen.
+      </div>
+      <div class="prayer-text-card">
+        <div class="prayer-title">Prayer to Saint Michael the Archangel</div>
+        Saint Michael the Archangel, defend us in battle. Be our defense against the wickedness and snares of the Devil. May God rebuke him, we humbly pray, and do thou, O Prince of the heavenly hosts, by the power of God, thrust into hell Satan, and all the evil spirits, who prowl about the world seeking the ruin of souls. Amen.
+      </div>
+      <div class="prayer-text-card">
+        <div class="prayer-title">Prayer to the Shoulder Wound of Jesus</div>
+        O Loving Jesus, meek Lamb of God, I a miserable sinner, salute and worship the most Sacred Wound of Thy Shoulder on which Thou didst bear Thy heavy Cross, which so tore Thy Flesh and laid bare Thy Bones as to inflict on Thee an anguish greater than any other wound of Thy most Blessed Body. I adore Thee, O Jesus most sorrowful; I praise and glorify Thee, and give Thee thanks for this most sacred and painful Wound, beseeching Thee by that exceeding pain, and by the crushing burden of Thy heavy Cross, to be merciful to me, a sinner, to forgive me all my mortal and venial sins, and to lead me on towards Heaven, and there to prepare for me a place to rest near Thee. Amen.
+      </div>
+    </div>
+  </div>
+
+  <!-- PRAYER NOTES -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">📝</span> Prayer Notes</div>
+    </div>
+    <div class="section-body">
+      <textarea class="notes-area" id="prayerNotes" placeholder="Intentions, reflections, notes..." oninput="saveNotes('prayer')"></textarea>
+      <div class="notes-saved" id="prayerNotesSaved"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FITNESS -->
+<div class="page" id="page-fitness">
+  <div class="app-header">
+    <h1>Fitness</h1>
+  </div>
+
+  <!-- WORKOUT -->
+  <div class="section-card" style="margin-top:1rem">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">💪</span> Today's Workout</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="workoutBadge" class="badge badge-gold"></span>
+        <button class="small-btn" onclick="openMuscleModal()" style="font-size:12px;padding:5px 11px;">+ Add</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="muscle-grid" id="muscleGrid"></div>
+      <!-- WORKOUT TIME -->
+      <div class="workout-time-row">
+        <span class="workout-time-label">⏱ Workout duration</span>
+        <button class="supp-btn" onclick="adjustTime(-5)">−</button>
+        <span class="workout-time-val" id="workoutTimeVal">0 min</span>
+        <button class="supp-btn" onclick="adjustTime(5)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERSONAL BESTS -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">🏆</span> Personal Bests</div>
+      <button class="small-btn" onclick="openPBModal()" style="font-size:12px;padding:5px 11px;">+ Add</button>
+    </div>
+    <div class="section-body">
+      <div class="pb-list" id="pbList"></div>
+      <div class="no-data" id="pbEmpty" style="display:none">No personal bests yet. Add one above!</div>
+    </div>
+  </div>
+
+  <!-- FITNESS NOTES -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">📝</span> Workout Notes</div>
+    </div>
+    <div class="section-body">
+      <textarea class="notes-area" id="fitnessNotes" placeholder="Sets, reps, how you felt..." oninput="saveNotes('fitness')"></textarea>
+      <div class="notes-saved" id="fitnessNotesSaved"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <div class="app-header">
+    <h1>History</h1>
+  </div>
+  <div style="margin-top:1rem">
+    <div class="hist-nav">
+      <button onclick="histNav(-1)">‹</button>
+      <div class="hist-date" id="histDateLabel"></div>
+      <button onclick="histNav(1)">›</button>
+    </div>
+    <!-- WEIGHT TREND -->
+    <div class="section-card">
+      <div class="section-header"><div class="section-title"><span class="icon">📈</span> Weight Trend (7 days)</div></div>
+      <div class="section-body">
+        <div class="trend-chart" id="trendChart"></div>
+      </div>
+    </div>
+    <div id="histContent"></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="pbModal">
+  <div class="modal">
+    <h3 id="pbModalTitle">Add Personal Best</h3>
+    <label>Exercise name</label>
+    <input type="text" id="pbNameIn" placeholder="e.g. Preacher Curl" />
+    <label>Weight / Record</label>
+    <input type="text" id="pbValIn" placeholder="e.g. 50 lbs" />
+    <div class="modal-btns">
+      <button class="small-btn" onclick="closePBModal()">Cancel</button>
+      <button class="small-btn primary" onclick="savePB()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="suppModal">
+  <div class="modal">
+    <h3>Add Supplement</h3>
+    <label>Supplement name</label>
+    <input type="text" id="suppNameIn" placeholder="e.g. Magnesium" />
+    <div class="modal-btns">
+      <button class="small-btn" onclick="closeSuppModal()">Cancel</button>
+      <button class="small-btn primary" onclick="saveSupp()">Add</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="muscleModal">
+  <div class="modal">
+    <h3>Add Muscle Group</h3>
+    <label>Name</label>
+    <input type="text" id="muscleNameIn" placeholder="e.g. Neck, Traps..." />
+    <div class="modal-btns">
+      <button class="small-btn" onclick="closeMuscleModal()">Cancel</button>
+      <button class="small-btn primary" onclick="saveMuscle()">Add</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="customPrayerModal">
+  <div class="modal">
+    <h3>Add Prayer</h3>
+    <label>Prayer name</label>
+    <input type="text" id="customPrayerIn" placeholder="e.g. Chaplet of Divine Mercy" />
+    <div class="modal-btns">
+      <button class="small-btn" onclick="closeCustomPrayerModal()">Cancel</button>
+      <button class="small-btn primary" onclick="saveCustomPrayer()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const APP_KEY = 'mydailyapp_v7';
+
+function getLocalDateString() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+const TODAY = getLocalDateString();
+
+// default data
+const DEFAULT_SUPPLEMENTS = ['Ashwagandha','Vitamin D','Zinc','Fish Oil','Creatine'];
+const DEFAULT_MUSCLES = ['Chest','Back','Shoulders','Biceps','Triceps','Forearms','Abs / Core','Quads','Hamstrings','Glutes','Calves','Walk','Cardio'];
+const ROSARY_MYSTERIES = [
+  { id:'joyful', name:'Joyful Mysteries', days:'Mon & Sat', prayers:['1. The Annunciation','2. The Visitation','3. The Nativity','4. The Presentation','5. Finding Jesus in the Temple'] },
+  { id:'sorrowful', name:'Sorrowful Mysteries', days:'Tue & Fri', prayers:['1. Agony in the Garden','2. Scourging at the Pillar','3. Crowning with Thorns','4. Carrying the Cross','5. The Crucifixion'] },
+  { id:'glorious', name:'Glorious Mysteries', days:'Wed & Sun', prayers:['1. The Resurrection','2. The Ascension','3. Descent of the Holy Spirit','4. Assumption of Mary','5. Coronation of Mary'] },
+  { id:'luminous', name:'Luminous Mysteries', days:'Thursday', prayers:['1. Baptism of Jesus','2. Wedding at Cana','3. Proclamation of the Kingdom','4. The Transfiguration','5. Institution of the Eucharist'] },
+];
+const DEFAULT_PRAYER_CHECKS = [
+  { id:'morning', name:'Morning Offering' },
+  { id:'readings', name:'Daily Readings', link:'https://bible.usccb.org/daily-bible-reading' },
+  { id:'evening', name:'Evening Examination' },
+];
+
+function loadAll() { try { return JSON.parse(localStorage.getItem(APP_KEY)) || {}; } catch(e) { return {}; } }
+function saveAll(d) { try { localStorage.setItem(APP_KEY, JSON.stringify(d)); } catch(e) {} }
+function getDay(ds) { const a = loadAll(); return a[ds] || {}; }
+function setDay(ds, data) { const a = loadAll(); a[ds] = { ...getDay(ds), ...data }; saveAll(a); }
+function getPersist() { const a = loadAll(); return a['__persist__'] || {}; }
+function setPersist(data) { const a = loadAll(); a['__persist__'] = { ...getPersist(), ...data }; saveAll(a); }
+
+function getSupplements() { return getPersist().supplements || DEFAULT_SUPPLEMENTS; }
+function getMuscles() { return getPersist().muscles || DEFAULT_MUSCLES; }
+function getPrayerChecks() {
+  const p = getPersist();
+  return p.prayerChecks || DEFAULT_PRAYER_CHECKS;
+}
+
+// ── HEADER ──
+function initHeader() {
+  const h = new Date().getHours();
+  document.getElementById('todayGreeting').textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+}
+
+// ── WEIGHT ──
+function getYesterdayStr() {
+  const d = new Date(); d.setDate(d.getDate()-1);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function renderWeight() {
+  const persist = getPersist();
+  const weight = persist.weight;
+  const wDate = persist.weightDate;
+  document.getElementById('weightDisplay').textContent = weight ? weight : '—';
+  document.getElementById('weightDate').textContent = wDate ? 'Last logged ' + wDate : '';
+  if (weight) document.getElementById('weightInput').placeholder = 'Current: ' + weight + ' lbs';
+  // delta
+  const deltaEl = document.getElementById('weightDelta');
+  const yDay = getDay(getYesterdayStr());
+  const yWeight = yDay.weight;
+  if (weight && yWeight) {
+    const diff = (weight - yWeight).toFixed(1);
+    if (diff > 0) { deltaEl.textContent = '▲ +' + diff + ' lbs from yesterday'; deltaEl.className = 'weight-delta up'; }
+    else if (diff < 0) { deltaEl.textContent = '▼ ' + diff + ' lbs from yesterday'; deltaEl.className = 'weight-delta down'; }
+    else { deltaEl.textContent = '→ Same as yesterday'; deltaEl.className = 'weight-delta same'; }
+  } else { deltaEl.textContent = ''; }
+}
+function logWeight() {
+  const v = parseFloat(document.getElementById('weightInput').value);
+  if (!v || v < 50 || v > 600) return;
+  setPersist({ weight: v, weightDate: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}) });
+  setDay(TODAY, { weight: v });
+  document.getElementById('weightInput').value = '';
+  renderWeight();
+}
+
+// ── WATER ──
+function getGoals() { return getPersist().goals || { water: 80 }; }
+function renderWater() {
+  const day = getDay(TODAY);
+  const oz = day.water || 0;
+  const goal = getGoals().water;
+  document.getElementById('waterBig').textContent = oz;
+  document.getElementById('waterBarFill').style.width = Math.min(100, Math.round(oz/goal*100)) + '%';
+  document.getElementById('waterGoalLabel').textContent = oz + ' / ' + goal + ' oz goal';
+  document.getElementById('waterGoalBadge').textContent = Math.round(oz/goal*100) + '%';
+}
+function addWater(oz) { const d = getDay(TODAY); setDay(TODAY, { water: (d.water||0) + oz }); renderWater(); }
+function addWaterCustom() { const v = parseInt(document.getElementById('waterCustom').value); if (v>0) { addWater(v); document.getElementById('waterCustom').value=''; } }
+
+// ── SUPPLEMENTS ──
+function renderSupps() {
+  const day = getDay(TODAY);
+  const counts = day.suppCounts || {};
+  const supps = getSupplements();
+  let html = '';
+  supps.forEach(s => {
+    const cnt = counts[s] || 0;
+    html += `<div class="supp-row">
+      <span class="supp-name" onclick="toggleSuppCheck('${s}')" style="${cnt>0?'color:var(--text3);text-decoration:line-through':''}">${s}</span>
+      <button class="supp-btn" onclick="adjustSupp('${s}',-1)">−</button>
+      <span class="supp-count" style="${cnt>0?'color:var(--green)':''}">${cnt}</span>
+      <button class="supp-btn" onclick="adjustSupp('${s}',1)">+</button>
+      <button class="supp-del" onclick="deleteSupp('${s}')" title="Remove">×</button>
+    </div>`;
+  });
+  document.getElementById('suppList').innerHTML = html || '<div class="no-data">No supplements. Add one!</div>';
+  // badge: count how many taken at least once
+  const taken = supps.filter(s => (counts[s]||0) > 0).length;
+  document.getElementById('suppBadge') && (document.getElementById('suppBadge').textContent = taken+'/'+supps.length);
+}
+function adjustSupp(name, delta) {
+  const day = getDay(TODAY);
+  const counts = {...(day.suppCounts||{})};
+  counts[name] = Math.max(0, (counts[name]||0) + delta);
+  setDay(TODAY, { suppCounts: counts });
+  renderSupps();
+}
+function toggleSuppCheck(name) {
+  const day = getDay(TODAY);
+  const counts = {...(day.suppCounts||{})};
+  counts[name] = counts[name] > 0 ? 0 : 1;
+  setDay(TODAY, { suppCounts: counts });
+  renderSupps();
+}
+function deleteSupp(name) {
+  const supps = getSupplements().filter(s => s !== name);
+  setPersist({ supplements: supps });
+  renderSupps();
+}
+function openSuppModal() { document.getElementById('suppNameIn').value=''; document.getElementById('suppModal').classList.add('open'); setTimeout(()=>document.getElementById('suppNameIn').focus(),100); }
+function closeSuppModal() { document.getElementById('suppModal').classList.remove('open'); }
+function saveSupp() {
+  const name = document.getElementById('suppNameIn').value.trim();
+  if (!name) return;
+  const supps = getSupplements();
+  if (!supps.includes(name)) { supps.push(name); setPersist({ supplements: supps }); }
+  closeSuppModal(); renderSupps();
+}
+
+// ── MUSCLES ──
+function renderMuscles() {
+  const day = getDay(TODAY);
+  const done = day.muscles || [];
+  const time = day.workoutTime || 0;
+  document.getElementById('workoutBadge').textContent = done.length > 0 ? done.length + ' trained' : 'Rest day';
+  document.getElementById('workoutTimeVal').textContent = time + ' min';
+  const muscles = getMuscles();
+  let html = '';
+  muscles.forEach(m => {
+    const isActive = done.includes(m);
+    html += `<div class="muscle-btn${isActive?' active':''}" onclick="toggleMuscle('${m}')">
+      <div class="dot"></div><span>${m}</span>
+      <button class="muscle-del" onclick="deleteMuscle(event,'${m}')" title="Remove">×</button>
+    </div>`;
+  });
+  document.getElementById('muscleGrid').innerHTML = html;
+}
+function toggleMuscle(name) {
+  const day = getDay(TODAY);
+  let done = day.muscles ? [...day.muscles] : [];
+  done = done.includes(name) ? done.filter(x=>x!==name) : [...done, name];
+  setDay(TODAY, { muscles: done }); renderMuscles();
+}
+function deleteMuscle(e, name) {
+  e.stopPropagation();
+  const muscles = getMuscles().filter(m => m !== name);
+  setPersist({ muscles });
+  // also remove from today if active
+  const day = getDay(TODAY);
+  setDay(TODAY, { muscles: (day.muscles||[]).filter(m=>m!==name) });
+  renderMuscles();
+}
+function adjustTime(delta) {
+  const day = getDay(TODAY);
+  const t = Math.max(0, (day.workoutTime||0) + delta);
+  setDay(TODAY, { workoutTime: t }); renderMuscles();
+}
+function openMuscleModal() { document.getElementById('muscleNameIn').value=''; document.getElementById('muscleModal').classList.add('open'); setTimeout(()=>document.getElementById('muscleNameIn').focus(),100); }
+function closeMuscleModal() { document.getElementById('muscleModal').classList.remove('open'); }
+function saveMuscle() {
+  const name = document.getElementById('muscleNameIn').value.trim();
+  if (!name) return;
+  const muscles = getMuscles();
+  if (!muscles.includes(name)) { muscles.push(name); setPersist({ muscles }); }
+  closeMuscleModal(); renderMuscles();
+}
+
+// ── PERSONAL BESTS ──
+let pbEditId = null;
+function renderPBs() {
+  const pbs = getPersist().personalBests || [];
+  const list = document.getElementById('pbList');
+  const empty = document.getElementById('pbEmpty');
+  if (!pbs.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = pbs.map(pb => `
+    <div class="pb-item">
+      <div class="pb-name">${pb.name}</div>
+      <div class="pb-val">${pb.val}</div>
+      <button class="pb-edit-btn" onclick="editPB('${pb.id}')">✎</button>
+      <button class="pb-del-btn" onclick="deletePB('${pb.id}')">×</button>
+    </div>`).join('');
+}
+function openPBModal(id) {
+  pbEditId = id||null;
+  document.getElementById('pbModalTitle').textContent = id ? 'Edit Personal Best' : 'Add Personal Best';
+  if (id) { const pb = (getPersist().personalBests||[]).find(p=>p.id===id); if(pb){document.getElementById('pbNameIn').value=pb.name;document.getElementById('pbValIn').value=pb.val;} }
+  else { document.getElementById('pbNameIn').value=''; document.getElementById('pbValIn').value=''; }
+  document.getElementById('pbModal').classList.add('open');
+  setTimeout(()=>document.getElementById('pbNameIn').focus(),100);
+}
+function closePBModal() { document.getElementById('pbModal').classList.remove('open'); pbEditId=null; }
+function savePB() {
+  const name = document.getElementById('pbNameIn').value.trim();
+  const val = document.getElementById('pbValIn').value.trim();
+  if (!name||!val) return;
+  let pbs = getPersist().personalBests || [];
+  if (pbEditId) pbs = pbs.map(p=>p.id===pbEditId?{...p,name,val}:p);
+  else pbs.push({id:Date.now().toString(),name,val});
+  setPersist({personalBests:pbs}); closePBModal(); renderPBs();
+}
+function editPB(id) { openPBModal(id); }
+function deletePB(id) {
+  if (!confirm('Remove this personal best?')) return;
+  setPersist({personalBests:(getPersist().personalBests||[]).filter(p=>p.id!==id)}); renderPBs();
+}
+
+// ── ROSARY ──
+function renderRosary() {
+  const day = getDay(TODAY);
+  const done = day.rosary || {};
+  let html = '';
+  ROSARY_MYSTERIES.forEach(m => {
+    const cp = done[m.id] || [];
+    const allDone = cp.length === m.prayers.length;
+    const isOpen = day['mystOpen_'+m.id];
+    html += `<div class="mystery-card">
+      <div class="mystery-header${allDone?' done-all':''}" onclick="toggleMystery('${m.id}')">
+        <div class="cb cb-circle">${allDone?'✓':''}</div>
+        <div class="mystery-name">${m.name} <span style="color:var(--text3);font-size:12px">(${m.days})</span></div>
+        <button class="mystery-toggle${isOpen?' open':''}" onclick="toggleMystOpen(event,'${m.id}')">▼</button>
+      </div>
+      <div class="mystery-prog">${cp.length}/${m.prayers.length} decades</div>
+      <div class="mystery-prayers${isOpen?' open':''}">`;
+    m.prayers.forEach(p => {
+      const pd = cp.includes(p);
+      html += `<div class="check-row${pd?' done':''}" onclick="toggleDecade('${m.id}','${p.replace(/'/g,"\\'")}')">
+        <div class="cb"></div><div class="check-label" style="font-size:13px">${p}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  document.getElementById('rosaryList').innerHTML = html;
+}
+function toggleMystery(mid) {
+  const day = getDay(TODAY);
+  const done = day.rosary ? JSON.parse(JSON.stringify(day.rosary)) : {};
+  const m = ROSARY_MYSTERIES.find(x=>x.id===mid);
+  if (!m) return;
+  done[mid] = (done[mid]||[]).length === m.prayers.length ? [] : [...m.prayers];
+  setDay(TODAY,{rosary:done}); renderRosary();
+}
+function toggleDecade(mid,prayer) {
+  const day = getDay(TODAY);
+  const done = day.rosary ? JSON.parse(JSON.stringify(day.rosary)) : {};
+  let cur = done[mid]||[];
+  cur = cur.includes(prayer) ? cur.filter(x=>x!==prayer) : [...cur,prayer];
+  done[mid] = cur; setDay(TODAY,{rosary:done}); renderRosary();
+}
+function toggleMystOpen(e,mid) {
+  e.stopPropagation();
+  const day = getDay(TODAY);
+  setDay(TODAY,{['mystOpen_'+mid]:!day['mystOpen_'+mid]}); renderRosary();
+}
+
+// ── PRAYER CHECKS ──
+function renderPrayerChecks() {
+  const day = getDay(TODAY);
+  const done = day.prayerChecks || [];
+  const checks = getPrayerChecks();
+  let html = '';
+  checks.forEach(p => {
+    const isDone = done.includes(p.id);
+    const linkHtml = p.link ? `<a href="${p.link}" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;color:var(--gold);text-decoration:none;margin-left:6px;">↗ Open</a>` : '';
+    const isCustom = !DEFAULT_PRAYER_CHECKS.find(d=>d.id===p.id);
+    const delBtn = isCustom ? `<button onclick="deleteCustomPrayer(event,'${p.id}')" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:2px 4px;">×</button>` : '';
+    html += `<div class="check-row${isDone?' done':''}" onclick="togglePrayerCheck('${p.id}')">
+      <div class="cb"></div>
+      <div style="flex:1"><div class="check-label" style="display:inline">${p.name}</div>${linkHtml}</div>
+      ${delBtn}
+    </div>`;
+  });
+  document.getElementById('prayerCheckList').innerHTML = html;
+  const cnt = done.filter(id=>checks.map(p=>p.id).includes(id)).length;
+  document.getElementById('prayerBadge').textContent = cnt+'/'+checks.length;
+}
+function togglePrayerCheck(id) {
+  const day = getDay(TODAY);
+  let done = day.prayerChecks ? [...day.prayerChecks] : [];
+  done = done.includes(id) ? done.filter(x=>x!==id) : [...done,id];
+  setDay(TODAY,{prayerChecks:done}); renderPrayerChecks();
+}
+function openCustomPrayerModal() { document.getElementById('customPrayerIn').value=''; document.getElementById('customPrayerModal').classList.add('open'); setTimeout(()=>document.getElementById('customPrayerIn').focus(),100); }
+function closeCustomPrayerModal() { document.getElementById('customPrayerModal').classList.remove('open'); }
+function saveCustomPrayer() {
+  const name = document.getElementById('customPrayerIn').value.trim();
+  if (!name) return;
+  const checks = getPrayerChecks();
+  checks.push({id:'custom_'+Date.now(), name});
+  setPersist({prayerChecks:checks}); closeCustomPrayerModal(); renderPrayerChecks();
+}
+function deleteCustomPrayer(e,id) {
+  e.stopPropagation();
+  const checks = getPrayerChecks().filter(p=>p.id!==id);
+  setPersist({prayerChecks:checks}); renderPrayerChecks();
+}
+
+// ── NOTES ──
+let notesSaveTimer = {};
+function loadNotes() {
+  const day = getDay(TODAY);
+  document.getElementById('prayerNotes').value = day.prayerNotes || '';
+  document.getElementById('fitnessNotes').value = day.fitnessNotes || '';
+}
+function saveNotes(type) {
+  clearTimeout(notesSaveTimer[type]);
+  notesSaveTimer[type] = setTimeout(() => {
+    const val = document.getElementById(type+'Notes').value;
+    setDay(TODAY, {[type+'Notes']: val});
+    const el = document.getElementById(type+'NotesSaved');
+    el.textContent = 'Saved';
+    setTimeout(()=>{el.textContent='';},1500);
+  }, 600);
+}
+
+// ── HISTORY ──
+let histOffset = 0;
+function histNav(dir) { histOffset += dir; if(histOffset>0) histOffset=0; renderHistory(); }
+
+function renderTrend() {
+  const labels = [];
+  const weights = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const day = getDay(ds);
+    const w = day.weight || null;
+    labels.push(d.toLocaleDateString('en-US',{weekday:'short'}).slice(0,1));
+    weights.push(w);
+  }
+  const valid = weights.filter(w=>w!==null);
+  if (valid.length < 2) { document.getElementById('trendChart').innerHTML = '<span style="color:var(--text3);font-size:12px">Log weight on multiple days to see trend</span>'; return; }
+  const min = Math.min(...valid) - 2;
+  const max = Math.max(...valid) + 2;
+  const range = max - min || 1;
+  let html = '';
+  weights.forEach((w,i) => {
+    const h = w ? Math.max(8, Math.round(((w-min)/range)*50)) : 3;
+    const col = w ? 'var(--gold)' : 'var(--border2)';
+    html += `<div class="trend-bar-wrap">
+      <div class="trend-val">${w?w:''}</div>
+      <div class="trend-bar" style="height:${h}px;background:${col}"></div>
+      <div class="trend-label">${labels[i]}</div>
+    </div>`;
+  });
+  document.getElementById('trendChart').innerHTML = html;
+}
+
+function renderHistory() {
+  renderTrend();
+  const d = new Date(); d.setDate(d.getDate()+histOffset);
+  const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const label = histOffset===0?'Today':histOffset===-1?'Yesterday':d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  document.getElementById('histDateLabel').textContent = label;
+  const day = getDay(dateStr);
+  const persist = getPersist();
+  let html = '';
+
+  // Weight
+  const w = day.weight || (histOffset===0?persist.weight:null);
+  html += `<div class="section-card"><div class="section-header"><div class="section-title"><span class="icon">⚖️</span> Weight</div></div><div class="section-body">`;
+  html += w ? `<div class="hist-weight-big">${w} <span style="font-size:14px;color:var(--text3)">lbs</span></div>` : `<div style="color:var(--text3);font-size:13px">Not logged</div>`;
+  html += `</div></div>`;
+
+  // Water
+  html += `<div class="section-card"><div class="section-header"><div class="section-title"><span class="icon">💧</span> Water</div></div><div class="section-body">`;
+  html += `<div class="hist-water-big">${day.water||0} <span style="font-size:14px;color:var(--text3)">oz</span></div>`;
+  html += `</div></div>`;
+
+  // Supplements
+  const counts = day.suppCounts || {};
+  const supps = getSupplements();
+  html += `<div class="section-card"><div class="section-header"><div class="section-title"><span class="icon">💊</span> Supplements</div></div><div class="section-body"><div class="tag-row">`;
+  supps.forEach(s => {
+    const cnt = counts[s]||0;
+    html += `<span class="hist-tag${cnt>0?' done':''}">${cnt>0?'✓ ':''}${s}${cnt>1?' ×'+cnt:''}</span>`;
+  });
+  html += `</div></div></div>`;
+
+  // Workout
+  const muscles = day.muscles || [];
+  const wTime = day.workoutTime || 0;
+  html += `<div class="section-card"><div class="section-header"><div class="section-title"><span class="icon">💪</span> Workout</div></div><div class="section-body"><div class="tag-row">`;
+  if (!muscles.length) html += `<span style="color:var(--text3);font-size:13px">Rest day</span>`;
+  else muscles.forEach(m => { html += `<span class="hist-tag done">✓ ${m}</span>`; });
+  if (wTime>0) html += `<span class="hist-tag done" style="margin-left:4px">⏱ ${wTime} min</span>`;
+  html += `</div></div></div>`;
+
+  // Rosary
+  const rosary = day.rosary || {};
+  html += `<div class="section-card"><div class="section-header"><div class="section-title"><span class="icon">📿</span> Rosary</div></div><div class="section-body"><div class="tag-row">`;
+  let anyRosary = false;
+  ROSARY_MYSTERIES.forEach(m => {
+    const cnt = (rosary[m.id]||[]).length;
+    if (cnt>0) { anyRosary=true; html+=`<span class="hist-tag done">✓ ${m.name} (${cnt}/5)</span>`; }
+  });
+  if (!anyRosary) html += `<span style="color:var(--text3);font-size:13px">None logged</span>`;
+  html += `</div></div></div>`;
+
+  // Prayers
+  const pChecks = day.prayerChecks || [];
+  html += `<div class="section-card"><div class="section-header"><div class="section-title"><span class="icon">🙏</span> Prayers</div></div><div class="section-body"><div class="tag-row">`;
+  getPrayerChecks().forEach(p => {
+    const done = pChecks.includes(p.id);
+    html += `<span class="hist-tag${done?' done':''}">${done?'✓ ':''}${p.name}</span>`;
+  });
+  html += `</div></div></div>`;
+
+  // Notes
+  if (day.fitnessNotes) {
+    html += `<div class="section-card"><div class="section-header"><div class="section-title"><span class="icon">📝</span> Workout Notes</div></div><div class="section-body"><div style="font-size:13px;color:var(--text2);line-height:1.6">${day.fitnessNotes.replace(/\n/g,'<br>')}</div></div></div>`;
+  }
+  if (day.prayerNotes) {
+    html += `<div class="section-card"><div class="section-header"><div class="section-title"><span class="icon">📝</span> Prayer Notes</div></div><div class="section-body"><div style="font-size:13px;color:var(--text2);line-height:1.6">${day.prayerNotes.replace(/\n/g,'<br>')}</div></div></div>`;
+  }
+
+  document.getElementById('histContent').innerHTML = html;
+}
+
+// ── NAV ──
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if (id==='history') renderHistory();
+  window.scrollTo(0,0);
+}
+
+// ── MODAL CLOSE ON BACKDROP ──
+['pbModal','suppModal','muscleModal','customPrayerModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => { if(e.target===document.getElementById(id)) document.getElementById(id).classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') ['pbModal','suppModal','muscleModal','customPrayerModal'].forEach(id=>document.getElementById(id).classList.remove('open'));
+  if (e.key==='Enter') {
+    if (document.getElementById('pbModal').classList.contains('open')) savePB();
+    if (document.getElementById('suppModal').classList.contains('open')) saveSupp();
+    if (document.getElementById('muscleModal').classList.contains('open')) saveMuscle();
+    if (document.getElementById('customPrayerModal').classList.contains('open')) saveCustomPrayer();
+  }
+});
+document.getElementById('waterCustom').addEventListener('keydown',e=>{if(e.key==='Enter')addWaterCustom();});
+document.getElementById('weightInput').addEventListener('keydown',e=>{if(e.key==='Enter')logWeight();});
+
+// ── INIT ──
+initHeader();
+renderWeight();
+renderWater();
+renderSupps();
+renderMuscles();
+renderPBs();
+renderRosary();
+renderPrayerChecks();
+loadNotes();
+</script>
+</body>
+</html>
